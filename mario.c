@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <cs50.h>
 
-int main (void)
+int main(void)
 
 {
-    int height;
+    int height;  //height of the pyramid
     
    do 
    {
-      height = get_int("Height:");
+      height = get_int("Height:");   //promting the user for height
    } 
    while (height > 8 || height < 1);
  
@@ -16,21 +16,21 @@ int main (void)
      
         for (int i = 1; i <= height; i++)   // the for loop for height(number of rows)
         {
-            for (int space = 1; space <= height - i ; space++)  //inner for loop for printing spaces
+            for (int space = 1; space <= height - i ; space++)  
             {
-                 printf(" ");
+                printf(" ");
             }
                 
-                for(int hash = 1; hash<= i; hash++)
+                for (int hash = 1; hash <= i; hash++)    //inner nested for loop for printing spaces
                 {
-                    printf("#");
+                printf("#");
                 }
                 
             
-        printf("\n");
+            printf("\n");
         
         }
-   }
+    }
   
     
 }    
