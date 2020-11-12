@@ -45,7 +45,7 @@ if not os.environ.get("API_KEY"):
 @login_required
 def index():
     """Show portfolio of stocks"""
-
+#i did this the complicated way before i realized that i don't have to join the 2 tables.
 #    portfolio = db.execute("SELECT stock,SUM(quantity),cash FROM transactions JOIN users ON users.id = transactions.id WHERE transactions.id = :id GROUP BY stock HAVING SUM(quantity) > 0", id = session["user_id"])
 
     portfolio = db.execute("SELECT stock, SUM(quantity) FROM transactions WHERE id = :id GROUP BY stock HAVING SUM(quantity) > 0", id = session["user_id"])
@@ -179,18 +179,21 @@ def buy():
         id = session["user_id"])
         buying_power = users_cashdict[0]["cash"]
 
+# !!! Very important. EVERY SQL query returns a LIST of DICTs. Here since I am expecting only
+# one dict, I access first the 0th index of the list and then the key "cash", which
+# gives me the value for cash. Remember that dict is key:value pairs. 
+
         return render_template("buy.html", buying_power = round(buying_power,2), id = id)
 
     else:
-#        if request.form.action:
             if not request.form.get("symbol"):
-                return apology("please enter a ticker man",403)
+                return apology("please enter a ticker",403)
 
             elif not lookup(request.form.get("symbol")):
-                return apology("not a valid ticker dude",403)
+                return apology("not a valid ticker",403)
 
             elif int(request.form.get("shares")) <= 0:
-                return apology("dude, you can't buy negative shares", 403)
+                return apology("You can't buy negative shares :)", 403)
 
             #getting the account cash value of the current user
             users_cashdict = db.execute("SELECT cash FROM users WHERE id = :id",
@@ -203,13 +206,13 @@ def buy():
             trx_cost = stock["price"] * num_sharestobuy
 
             if buying_power < trx_cost:
-                return apology("not enough cash, dude", 401)
+                return apology("not enough cashhh", 401)
             else:
-                        #""" Getting the price of the stock. lookup(request.form.get("symbol")) returns a dict
-                        #with keys as follows {name: (value)
-                        #                     symbol: (value)
-                        #                     price: (value) }
-                        #So stock["price"] accesses the value of price. """
+    #""" Getting the price of the stock. lookup(request.form.get("symbol")) returns a dict
+    #with keys as follows {name: (value)
+    #                     symbol: (value)
+    #                     price: (value) }
+    #So stock["price"] accesses the value of price. """
 
                         #update CASH column in the users table
                 db.execute("UPDATE users SET cash = cash - :trx_cost WHERE id = :id", trx_cost = trx_cost, id = session["user_id"])
@@ -232,13 +235,13 @@ def sell():
 
     else:
         if not request.form.get("symbol"):
-            return apology("please enter a ticker man",403)
+            return apology("please enter a ticker",403)
 
         elif not lookup(request.form.get("symbol")):
-            return apology("not a valid ticker dude",403)
+            return apology("not a valid ticker",403)
 
         elif int(request.form.get("shares")) <= 0:
-            return apology("dude, you can't sell negative shares", 403)
+            return apology("You can't sell negative shares", 403)
 
 
 
@@ -247,7 +250,7 @@ def sell():
         id = session["user_id"])
         avail_shares = users_sharesdict[0]["quantity"]
 
-# condition on what to do if funds for transaction are insufficient
+        # condition on what to do if funds for transaction are insufficient
         stock = lookup(request.form.get("symbol"))
         num_sharestosell = int(request.form.get("shares"))
         trx_proceeds = stock["price"] * num_sharestosell
@@ -260,13 +263,13 @@ def sell():
         id = session["user_id"], stock = stock["symbol"])
 
         if not existing_ticker:
-            return apology("you don't own this dude", 401)
+            return apology("you don't own this stock", 401)
 
         if ticker_balance[0]["SUM(quantity)"] == 0:
             return apology("you've traded this before, but now you have 0 shares of it", 401)
 
         if avail_shares < num_sharestosell:
-            return apology("not enough shares, dude", 401)
+            return apology("not enough shares", 401)
 
         else:
 #update CASH column in the users table
@@ -302,11 +305,6 @@ def add():
 
                return (f"you just added  ${how_much} to your account.")
                return render_template("index.html")
-
-
-
-
-
 
 
 
